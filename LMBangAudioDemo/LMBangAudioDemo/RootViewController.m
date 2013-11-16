@@ -118,7 +118,6 @@
         [self.playButton setTitle:@"开始播放" forState:UIControlStateNormal];
         [self stop];
     } else {
-        [self.playButton setTitle:@"停止播放" forState:UIControlStateNormal];
         NSError *error = [self  playWithUrl:self.recordPathURL];
         if (error) {
             
@@ -126,7 +125,9 @@
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"错误" message:errorMessage delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
             [alert show];
             [alert release];
+            return;
         }
+        [self.playButton setTitle:@"停止播放" forState:UIControlStateNormal];
         self.recordDescLabel.text = @"正在播放....";
         
     }
@@ -287,6 +288,11 @@
 }
 
 - (NSError *) playWithUrl:(NSURL *) url {
+    
+    if (!self.recordPathURL) {
+        return [NSError errorWithDomain:@"找不到文件路径，请先录音！" code:-12 userInfo:nil];
+    }
+    
     
     if ([self.player isPlaying]) {
         [self stop];
