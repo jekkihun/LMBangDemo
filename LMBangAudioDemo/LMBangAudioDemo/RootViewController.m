@@ -9,6 +9,37 @@
 #import "RootViewController.h"
 #import <AVFoundation/AVFoundation.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <memory.h>
+
+#include "ns.h"
+#include "mp3_alg.h"
+
+#define L 160
+#define FRAME (1152/2)
+#define MAXMP3BUFFER   720*2 //16384
+
+// noise suppress procedure
+extern void NoiseSupp(short *farray_ptr);
+// .wav filehead struct
+typedef struct{
+	char WRIFF[4];
+	long W08Size;
+	char WWAVE[4];
+	char Wfmt[4];
+	long WPCM;
+	short int  WC1;
+	short int  WChanel;
+	long WSampleRate;
+	long WSamplespersecond;
+	short int  WBytenumber;
+	short int  WResolution;
+	char Wdata[4];
+	long WSize;
+}WavFileHeader;
+
 #define kIOS7_OR_LATER      ([[[UIDevice currentDevice] systemVersion] compare:@"7.0"] != NSOrderedAscending)
 
 
@@ -23,6 +54,9 @@
 @property (nonatomic, retain) UIButton *recordButton;
 @property (nonatomic, retain) UIButton *playButton;
 @property (nonatomic, retain) UILabel  *recordDescLabel;
+@property (nonatomic, retain) NSString *filePath;
+@property (nonatomic, retain) NSString *fileConvertToPath;
+@property (nonatomic, retain) NSString *convertMp3FilePath;
 
 @end
 
@@ -37,6 +71,9 @@
     [_recordButton release];
     [_recordDescLabel release];
     [_playButton release];
+    [_filePath release];
+    [_fileConvertToPath release];
+    [_convertMp3FilePath release];
     [super dealloc];
 }
 
@@ -118,7 +155,7 @@
         [self.playButton setTitle:@"开始播放" forState:UIControlStateNormal];
         [self stop];
     } else {
-        NSError *error = [self  playWithUrl:self.recordPathURL];
+        NSError *error = [self  playWithUrl:[NSURL fileURLWithPath:self.convertMp3FilePath]];
         if (error) {
             
             NSString *errorMessage = [NSString stringWithFormat:@"Error:%@",error];
@@ -192,31 +229,57 @@
                                          AVEncoderBitRateKey: @16000};
          */
         
+        
         // AVFormatIDKey          - PCM
         // AVSampleRateKey        - 采样率
         // AVNumberOfChannelsKey  - 通道数目
         // AVLinearPCMBitDepthKey - 采样位数
         // AVLinearPCMIsFloatKey  - 采样信号是整数还是浮点数
         NSDictionary *recordSettings = @{AVFormatIDKey: @(kAudioFormatLinearPCM),
-                                         AVEncoderAudioQualityKey: @(AVAudioQualityMax),
-                                         AVNumberOfChannelsKey: @2,
-                                         AVSampleRateKey: @44100,
+                                         AVEncoderAudioQualityKey: @(AVAudioQualityMin),
+                                         AVNumberOfChannelsKey: @1,
+                                         AVSampleRateKey: @16000,
                                          AVLinearPCMIsBigEndianKey :@NO,
                                          AVLinearPCMIsFloatKey: @NO,
-                                         AVLinearPCMBitDepthKey :@16,
-                                         AVEncoderBitRateKey: @16000};
-        
+                                         AVLinearPCMBitDepthKey :@16};
+         
+         /*
+        NSDictionary *recordSettings = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                       [NSNumber numberWithFloat: 8000.0],AVSampleRateKey, //采样率
+                                       [NSNumber numberWithInt: kAudioFormatLinearPCM],AVFormatIDKey,
+                                       [NSNumber numberWithInt:16],AVLinearPCMBitDepthKey,//采样位数 默认 16
+                                       [NSNumber numberWithInt: 1], AVNumberOfChannelsKey,//通道的数目
+                                       //                                   [NSNumber numberWithBool:NO],AVLinearPCMIsBigEndianKey,//大端还是小端 是内存的组织方式
+                                       //                                   [NSNumber numberWithBool:NO],AVLinearPCMIsFloatKey,//采样信号是整数还是浮点数
+                                       //                                   [NSNumber numberWithInt: AVAudioQualityMedium],AVEncoderAudioQualityKey,//音频编码质量
+                                       nil];
+        */
         //create FileName
         NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
         [formatter setDateFormat:@"yyyyMMddHHmmss"];
-        NSString *uniqueName = [NSString stringWithFormat:@"lmbang_%@.lpcm",[formatter stringFromDate:[NSDate date]]];
+        NSString *uniqueName = [NSString stringWithFormat:@"lmbang_%@.wav",[formatter stringFromDate:[NSDate date]]];
         NSString *path = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"recordFile"];
+        
+        {
+            NSString *uniqueName = [NSString stringWithFormat:@"lmbang_%@_rs.wav",[formatter stringFromDate:[NSDate date]]];
+            NSString *path = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"recordFile"];
+            self.fileConvertToPath = [path stringByAppendingPathComponent:uniqueName];
+        
+        }
+        
+        {
+            NSString *uniqueName = [NSString stringWithFormat:@"lmbang_%@_rs.mp3",[formatter stringFromDate:[NSDate date]]];
+            NSString *path = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"recordFile"];
+            self.convertMp3FilePath = [path stringByAppendingPathComponent:uniqueName];
+            
+        }
         
         NSError *createDirError = nil;
         NSFileManager *fileManager = [NSFileManager defaultManager];
         [fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&createDirError];
         path = [path stringByAppendingPathComponent:uniqueName];
         NSLog(@"Will be record file path = %@",path);
+        self.filePath = path;
         self.recordPathURL = [NSURL fileURLWithPath:path];
         
         AVAudioRecorder *recorder = [[AVAudioRecorder alloc] initWithURL:self.recordPathURL settings:recordSettings error:&error];
@@ -273,7 +336,10 @@
     NSData *recordFile = [NSData dataWithContentsOfURL:self.recordPathURL];
     NSLog(@"recordFile Length = %d KB and record time = %d",recordFile.length / 1024,recordTime);
     self.recordDescLabel.text = [NSString stringWithFormat:@"文件大小：%dKB 录音时长：%d 秒",recordFile.length / 1024,recordTime];
+    [self.recordButton setTitle:@"开始录音" forState:UIControlStateNormal];
 
+    [self convert];
+    [self converToMp3];
     //清除对象
     self.recorder = nil;
 }
@@ -289,7 +355,7 @@
 
 - (NSError *) playWithUrl:(NSURL *) url {
     
-    if (!self.recordPathURL) {
+    if (!self.convertMp3FilePath) {
         return [NSError errorWithDomain:@"找不到文件路径，请先录音！" code:-12 userInfo:nil];
     }
     
@@ -336,6 +402,117 @@
     self.player = player;
     [player release];
     return nil;
+}
+
+
+#pragma mark - Convert
+- (void) convert {
+	WavFileHeader head;
+	short int readbuf[L];
+    
+	//char fname1[256] = "/Users/apple/Documents/nsevrc_testlib/test16k.wav";        // degraded speech
+	//char fname2[256] = "/Users/apple/Documents/nsevrc_testlib/test16k_ns.wav";        // filted speech
+    
+    
+    //self.filePath = [[NSBundle mainBundle] pathForResource:@"test16k" ofType:@"wav"];
+    const char *fname1 = [self.filePath UTF8String];
+    const char *fname2 = [self.fileConvertToPath UTF8String];
+
+	FILE *fp1, *fp2, *logFile;
+    
+	if((fp1=fopen(fname1,"rb")) == NULL){
+		printf("\nCann't open %s", fname1);
+		//exit(0);
+	}
+   	if((fp2=fopen(fname2,"wb")) == NULL){
+		printf("\nCann't open %s", fname2);
+		//exit(0);
+	}
+    
+    printf("\n --- Running ---\n");
+    
+	fread(&head,sizeof(WavFileHeader),1,fp1);
+	fwrite(&head,sizeof(WavFileHeader),1,fp2);
+	fseek(fp1,sizeof(WavFileHeader),SEEK_SET);
+    
+	while(!feof(fp1)){
+		fread(&readbuf[0],sizeof(short),L,fp1);
+		
+		NoiseSupp(&readbuf[0]);
+		fwrite(&readbuf[0],sizeof(short),L,fp2);
+	}
+    printf("\n --- END ---\n");
+    
+	fclose(fp1);
+	fclose(fp2);
+}
+
+- (void) converToMp3 {
+    WavFileHeader head;
+    
+    FILE *f_speech = NULL;                 /* File of speech data                   */
+    FILE *f_serial = NULL;                 /* File of serial bits for transmission  */
+    
+    
+    //   short pcm_l[1152],pcm_r[1152];
+    unsigned char mp3buffer[MAXMP3BUFFER];
+    unsigned short     Buffer[1152];
+    int k=1;
+    
+    T_mp3CodecParam CodecParam;
+    
+    short length, pack_len;
+    short frame = 0;
+    short err = 0, iread;
+    short max = 0;
+    
+    const char *pin_name = [self.fileConvertToPath UTF8String];
+    const char *pout_name = [self.convertMp3FilePath UTF8String];
+    
+    /*
+     * Open speech file and result file (output serial bit stream)
+     */
+    if ((f_speech = fopen(pin_name, "rb")) == NULL)
+        printf("Can't open pin_name.pcm !\n"), err++;
+    
+    if ((f_serial = fopen(pout_name, "w+b")) == NULL)
+        printf("Can't open pout_name.pcm !\n" ), err++;
+    
+    
+	fread(&head,sizeof(WavFileHeader),1,f_speech);
+    
+    /*
+     * Initialisation
+     */
+	CodecParam.num_channels = 1; //mono
+	CodecParam.in_samplerate = 16000; //Hz
+	CodecParam.brate = 32; //32kbps
+    
+	//pack_len = (CodecParam.brate*1000*FRAME)/(CodecParam.in_samplerate*8);
+    
+	mp3EncoderInit(&CodecParam);
+	
+    printf("\n --- Running ---\n");
+    
+    frame = 0;
+    
+    
+    while ((iread = fread(Buffer, sizeof(unsigned short), FRAME, f_speech)) != 0)//int
+    {
+        
+        frame++;
+        printf(" \n Frames processed: %hd\r", frame);
+        
+        /* encode */
+        mp3EncoderProc(Buffer, iread,	mp3buffer, &length);
+        
+        fwrite(mp3buffer, 1, length, f_serial);
+        
+    }
+    printf("\n --- END ---\n");
+    
+    fclose(f_speech);
+    fclose(f_serial);
 }
 
 

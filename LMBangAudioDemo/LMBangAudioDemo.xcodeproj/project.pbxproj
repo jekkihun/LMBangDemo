@@ -35,6 +35,11 @@
 		9113DF861837266B00370CED /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9113DF791837266B00370CED /* Icon.png */; };
 		9113DF871837266B00370CED /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9113DF7A1837266B00370CED /* Icon@2x.png */; };
 		9113DF881837266B00370CED /* iTunesArtwork in Resources */ = {isa = PBXBuildFile; fileRef = 9113DF7B1837266B00370CED /* iTunesArtwork */; };
+		91F176081837CE1F00632ED5 /* test16k.wav in Resources */ = {isa = PBXBuildFile; fileRef = 91F176071837CE1F00632ED5 /* test16k.wav */; };
+		91F1760B1837DACB00632ED5 /* libnsevrc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 91F176001837C6D300632ED5 /* libnsevrc.a */; };
+		91F1760C1837DAD100632ED5 /* libmp3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 91F175FA1837C6D300632ED5 /* libmp3.a */; };
+		91F1760E1837DF9E00632ED5 /* libmp3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 91F1760D1837DF9E00632ED5 /* libmp3.a */; };
+		91F176101837DFA400632ED5 /* libnsevrc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 91F1760F1837DFA400632ED5 /* libnsevrc.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +86,13 @@
 		9113DF791837266B00370CED /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		9113DF7A1837266B00370CED /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
 		9113DF7B1837266B00370CED /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; path = iTunesArtwork; sourceTree = "<group>"; };
+		91F175F81837C6D300632ED5 /* mp3_alg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mp3_alg.h; sourceTree = "<group>"; };
+		91F175FA1837C6D300632ED5 /* libmp3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libmp3.a; sourceTree = "<group>"; };
+		91F175FE1837C6D300632ED5 /* ns.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ns.h; sourceTree = "<group>"; };
+		91F176001837C6D300632ED5 /* libnsevrc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libnsevrc.a; sourceTree = "<group>"; };
+		91F176071837CE1F00632ED5 /* test16k.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = test16k.wav; sourceTree = "<group>"; };
+		91F1760D1837DF9E00632ED5 /* libmp3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libmp3.a; sourceTree = "<group>"; };
+		91F1760F1837DFA400632ED5 /* libnsevrc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libnsevrc.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,9 +101,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				9113DF6C1837177200370CED /* CoreAudio.framework in Frameworks */,
+				91F1760C1837DAD100632ED5 /* libmp3.a in Frameworks */,
+				91F1760B1837DACB00632ED5 /* libnsevrc.a in Frameworks */,
 				9113DF6A1837175300370CED /* AudioToolbox.framework in Frameworks */,
+				91F176101837DFA400632ED5 /* libnsevrc.a in Frameworks */,
 				9113DF3A1837165F00370CED /* CoreGraphics.framework in Frameworks */,
 				9113DF3C1837165F00370CED /* UIKit.framework in Frameworks */,
+				91F1760E1837DF9E00632ED5 /* libmp3.a in Frameworks */,
 				9113DF381837165E00370CED /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -144,6 +160,7 @@
 		9113DF3D1837165F00370CED /* LMBangAudioDemo */ = {
 			isa = PBXGroup;
 			children = (
+				91F175F61837C6D300632ED5 /* NsevrcLib */,
 				9113DF66183716C400370CED /* RootViewController.h */,
 				9113DF67183716C400370CED /* RootViewController.m */,
 				9113DF461837165F00370CED /* AppDelegate.h */,
@@ -187,6 +204,7 @@
 		9113DF6D1837266B00370CED /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				91F176071837CE1F00632ED5 /* test16k.wav */,
 				9113DF6E1837266B00370CED /* Icons */,
 			);
 			path = Resource;
@@ -210,6 +228,67 @@
 				9113DF7B1837266B00370CED /* iTunesArtwork */,
 			);
 			path = Icons;
+			sourceTree = "<group>";
+		};
+		91F175F61837C6D300632ED5 /* NsevrcLib */ = {
+			isa = PBXGroup;
+			children = (
+				91F175F71837C6D300632ED5 /* convert */,
+				91F175FD1837C6D300632ED5 /* nsevrc */,
+			);
+			path = NsevrcLib;
+			sourceTree = "<group>";
+		};
+		91F175F71837C6D300632ED5 /* convert */ = {
+			isa = PBXGroup;
+			children = (
+				91F175F81837C6D300632ED5 /* mp3_alg.h */,
+				91F175F91837C6D300632ED5 /* Release-iphoneos */,
+				91F175FB1837C6D300632ED5 /* Release-iphonesimulator */,
+			);
+			path = convert;
+			sourceTree = "<group>";
+		};
+		91F175F91837C6D300632ED5 /* Release-iphoneos */ = {
+			isa = PBXGroup;
+			children = (
+				91F175FA1837C6D300632ED5 /* libmp3.a */,
+			);
+			path = "Release-iphoneos";
+			sourceTree = "<group>";
+		};
+		91F175FB1837C6D300632ED5 /* Release-iphonesimulator */ = {
+			isa = PBXGroup;
+			children = (
+				91F1760D1837DF9E00632ED5 /* libmp3.a */,
+			);
+			path = "Release-iphonesimulator";
+			sourceTree = "<group>";
+		};
+		91F175FD1837C6D300632ED5 /* nsevrc */ = {
+			isa = PBXGroup;
+			children = (
+				91F175FE1837C6D300632ED5 /* ns.h */,
+				91F175FF1837C6D300632ED5 /* Release-iphoneos */,
+				91F176011837C6D300632ED5 /* Release-iphonesimulator */,
+			);
+			path = nsevrc;
+			sourceTree = "<group>";
+		};
+		91F175FF1837C6D300632ED5 /* Release-iphoneos */ = {
+			isa = PBXGroup;
+			children = (
+				91F176001837C6D300632ED5 /* libnsevrc.a */,
+			);
+			path = "Release-iphoneos";
+			sourceTree = "<group>";
+		};
+		91F176011837C6D300632ED5 /* Release-iphonesimulator */ = {
+			isa = PBXGroup;
+			children = (
+				91F1760F1837DFA400632ED5 /* libnsevrc.a */,
+			);
+			path = "Release-iphonesimulator";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -296,6 +375,7 @@
 				9113DF7C1837266B00370CED /* Default-568h.png in Resources */,
 				9113DF861837266B00370CED /* Icon.png in Resources */,
 				9113DF811837266B00370CED /* Icon-72.png in Resources */,
+				91F176081837CE1F00632ED5 /* test16k.wav in Resources */,
 				9113DF871837266B00370CED /* Icon@2x.png in Resources */,
 				9113DF831837266B00370CED /* Icon-Small-50.png in Resources */,
 				9113DF851837266B00370CED /* Icon-Small@2x.png in Resources */,
@@ -439,6 +519,8 @@
 		9113DF611837165F00370CED /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = NO;
@@ -447,8 +529,19 @@
 				GCC_PREFIX_HEADER = "LMBangAudioDemo/LMBangAudioDemo-Prefix.pch";
 				INFOPLIST_FILE = "LMBangAudioDemo/LMBangAudioDemo-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/LMBangAudioDemo/NsevrcLib/convert/Release$(EFFECTIVE_PLATFORM_NAME)/\"",
+					"\"$(SRCROOT)/LMBangAudioDemo/NsevrcLib/nsevrc/Release$(EFFECTIVE_PLATFORM_NAME)/\"",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = (
+					"-all_load",
+					"-ObjC",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "E5A8CBEF-8910-4D7A-8935-8D684DB78B66";
+				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -456,6 +549,8 @@
 		9113DF621837165F00370CED /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = NO;
@@ -464,8 +559,19 @@
 				GCC_PREFIX_HEADER = "LMBangAudioDemo/LMBangAudioDemo-Prefix.pch";
 				INFOPLIST_FILE = "LMBangAudioDemo/LMBangAudioDemo-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/LMBangAudioDemo/NsevrcLib/convert/Release$(EFFECTIVE_PLATFORM_NAME)/\"",
+					"\"$(SRCROOT)/LMBangAudioDemo/NsevrcLib/nsevrc/Release$(EFFECTIVE_PLATFORM_NAME)/\"",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = (
+					"-all_load",
+					"-ObjC",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "E5A8CBEF-8910-4D7A-8935-8D684DB78B66";
+				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
